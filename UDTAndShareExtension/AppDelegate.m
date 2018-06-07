@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#define LJJ_SHAREUSERDEFAULTSKEY @"LJJ_ShareUserDefaultsKey"
 
 @interface AppDelegate ()
 
@@ -25,7 +26,17 @@
     if ([[url scheme] isKindOfClass:[NSString class]] && [[url scheme] isEqualToString:@"MyShare"]) {//打开当前App
         if ([[options objectForKey:UIApplicationOpenURLOptionsSourceApplicationKey] isEqualToString:@"peony.UDTAndShareExtension.ShareExtension"]) {//分享扩展发送过来的
             //获取分享类型
-            NSString *shareType = [[url.absoluteString componentsSeparatedByString:@"-"] lastObject];
+            NSString *shareTypessssss = [[url.absoluteString componentsSeparatedByString:@"-"] lastObject];
+            
+            //获取分享数据NSDictionary *shareDic = @{@"shareType" : self.currentType,@"shareData" : self.shareArray,@"detail":@""};
+            NSUserDefaults *shareDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.MyShareGroup"];
+            NSData *data = [shareDefaults objectForKey:LJJ_SHAREUSERDEFAULTSKEY];
+            NSDictionary *shareDic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
+            NSString *shareType = [shareDic objectForKey:@"shareType"];
+            NSArray *shareData = [shareDic objectForKey:@"shareData"];
+            NSString *detail = [shareDic objectForKey:@"detail"];
+            
+            
         }
     }
     

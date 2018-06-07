@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 
-#define LJJ_SHAREUSERDEFAULTSKEY @"LJJ_ShareUserDefaultsKey"
+
 
 @interface ViewController ()
 
@@ -22,13 +22,6 @@
 }
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    //获取分享数据
-    NSUserDefaults *shareDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.MyShareGroup"];
-    NSData *shareData = [shareDefaults objectForKey:LJJ_SHAREUSERDEFAULTSKEY];
-    NSDictionary *shareDic = [NSJSONSerialization JSONObjectWithData:shareData options:NSJSONReadingMutableLeaves error:nil];
-    NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:[[shareDic objectForKey:@"shareData"] lastObject]]];
-    
-    [[[UIAlertView alloc] initWithTitle:@"收到分享" message:[NSString stringWithFormat:@"%@,%ld",data.length > 0 ? @"可以读取到图片" : @"不能读取图片",data.length] delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil] show];
 }
 
 
