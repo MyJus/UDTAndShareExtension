@@ -1,0 +1,4 @@
+# UDTAndShareExtension
+新建的工程，预想的是实现iOS UDT和shareExtension。暂时只是实现shareExtension
+分享扩展功能应该算是完成了。使用的时候记得设置一下App Group。利用的是AppGroup userDefaults进行的传值，
+分享界面引用自定义的控制器，选择图片时
