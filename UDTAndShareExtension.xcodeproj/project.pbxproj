@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B07D448F20C8E53B00068040 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B07D448E20C8E53B00068040 /* README.md */; };
 		B08B414320C78BC00019797E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B08B414220C78BC00019797E /* AppDelegate.m */; };
 		B08B414620C78BC00019797E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B08B414520C78BC00019797E /* ViewController.m */; };
 		B08B414920C78BC00019797E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B08B414720C78BC00019797E /* Main.storyboard */; };
@@ -63,6 +64,7 @@
 /* Begin PBXFileReference section */
 		B07D448C20C8BD2700068040 /* UDTAndShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UDTAndShareExtension.entitlements; sourceTree = "<group>"; };
 		B07D448D20C8BD7100068040 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		B07D448E20C8E53B00068040 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B08B413E20C78BC00019797E /* UDTAndShareExtension.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UDTAndShareExtension.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B08B414120C78BC00019797E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		B08B414220C78BC00019797E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -125,6 +127,7 @@
 		B08B413520C78BC00019797E = {
 			isa = PBXGroup;
 			children = (
+				B07D448E20C8E53B00068040 /* README.md */,
 				B08B414020C78BC00019797E /* UDTAndShareExtension */,
 				B08B415920C78BC20019797E /* UDTAndShareExtensionTests */,
 				B08B416420C78BC20019797E /* UDTAndShareExtensionUITests */,
@@ -341,6 +344,7 @@
 			files = (
 				B08B414E20C78BC10019797E /* LaunchScreen.storyboard in Resources */,
 				B08B414B20C78BC10019797E /* Assets.xcassets in Resources */,
+				B07D448F20C8E53B00068040 /* README.md in Resources */,
 				B08B414920C78BC00019797E /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
