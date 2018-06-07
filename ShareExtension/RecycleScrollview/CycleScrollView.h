@@ -26,6 +26,7 @@ typedef enum {
     CycleDirection scrollDirection;     // scrollView滚动的方向
     NSArray *imagesArray;               // 存放所有需要滚动的图片 UIImage
     NSMutableArray *curImages;          // 存放当前滚动的三张图片
+    NSArray *beforeShowImages;          // 之前展示的三张图片
     UIPageControl *pageControl;
 }
 

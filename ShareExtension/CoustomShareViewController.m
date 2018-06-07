@@ -72,10 +72,6 @@
     
     
     NSLog(@"%@",self.extensionContext.inputItems);
-    
-    UIImageView *showImage = [[UIImageView alloc] init];
-    showImage.center = container.center;
-    [container addSubview:showImage];
     //获取分享链接
     __weak typeof(self) weakself= self;
     [self.extensionContext.inputItems enumerateObjectsUsingBlock:^(NSExtensionItem *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -93,13 +89,13 @@
                     [weakself.shareArray addObject:item];
                     [weakself creatUIWithMessage:nil];
                 }];
-            }else if ([itemProvider hasItemConformingToTypeIdentifier:@"public.jpeg"]) {//分享图片
+            }else if ([itemProvider hasItemConformingToTypeIdentifier:@"public.jpeg"] || [itemProvider hasItemConformingToTypeIdentifier:@"public.png"] || [itemProvider hasItemConformingToTypeIdentifier:@"com.compuserve.gif"]) {//分享图片
                 NSString *errorMessage = [weakself getErrorMessageWithType:@"public.jpeg"];
                 if (errorMessage != nil) {//结束，展示错误信息
                     [weakself creatUIWithMessage:errorMessage];
                     *stop = YES;
                 }else {//可以分享
-                    [itemProvider loadItemForTypeIdentifier:@"public.jpeg" options:nil completionHandler:^(id<NSSecureCoding>  _Nullable item, NSError * _Null_unspecified error) {
+                    [itemProvider loadItemForTypeIdentifier:itemProvider.registeredTypeIdentifiers.lastObject options:nil completionHandler:^(id<NSSecureCoding>  _Nullable item, NSError * _Null_unspecified error) {
 //                        NSData *data = [NSData dataWithContentsOfURL:(NSURL *)item];
 //                        UIImage *image = [UIImage imageWithData:data];
                         if ([(NSURL *)item respondsToSelector:@selector(absoluteString)]) {
@@ -109,14 +105,14 @@
                     }];
                 }
                 
-            }else if ([itemProvider hasItemConformingToTypeIdentifier:@"public.video"]) {//分享视频
+            }else if ([itemProvider hasItemConformingToTypeIdentifier:@"com.apple.quicktime-movie"]) {//分享视频
                 
-                NSString *errorMessage = [weakself getErrorMessageWithType:@"public.video"];
+                NSString *errorMessage = [weakself getErrorMessageWithType:@"com.apple.quicktime-movie"];
                 if (errorMessage != nil) {//结束，展示错误信息
                     [weakself creatUIWithMessage:errorMessage];
                     *stop = YES;
                 }else {//可以分享
-                    [itemProvider loadItemForTypeIdentifier:@"public.video" options:nil completionHandler:^(id<NSSecureCoding>  _Nullable item, NSError * _Null_unspecified error) {
+                    [itemProvider loadItemForTypeIdentifier:@"com.apple.quicktime-movie" options:nil completionHandler:^(id<NSSecureCoding>  _Nullable item, NSError * _Null_unspecified error) {
 //                        NSData *data = [NSData dataWithContentsOfURL:(NSURL *)item];
                         if ([(NSURL *)item respondsToSelector:@selector(absoluteString)]) {
                             [weakself.shareArray addObject:[(NSURL *)item absoluteString]];
@@ -142,7 +138,7 @@
 }
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [UIView animateWithDuration:0.5 animations:^{
+    [UIView animateWithDuration:0.25 animations:^{
         self.containerView.frame = [UIScreen mainScreen].bounds;
     }];
 }
@@ -190,9 +186,9 @@
 - (NSString *)getTypeNameWithType:(NSString *)type {
     if ([type isEqualToString:@"public.url"]) {//分享网址
         return @"网址";
-    }else if ([type isEqualToString:@"public.jpeg"]) {//分享图片
+    }else if ([type isEqualToString:@"public.jpeg"] || [type isEqualToString:@"public.png"] || [type isEqualToString:@"com.compuserve.gif"]) {//分享图片([itemProvider hasItemConformingToTypeIdentifier:@"public.jpeg"] || [itemProvider hasItemConformingToTypeIdentifier:@"public.png"] || [itemProvider hasItemConformingToTypeIdentifier:@"com.compuserve.gif"])
         return @"图片";
-    }else if ([type isEqualToString:@"public.video"]) {//分享视频
+    }else if ([type isEqualToString:@"com.apple.quicktime-movie"]) {//分享视频
         
         return @"视频";
     }else {
@@ -205,16 +201,19 @@
         if (message == nil) {
             if ([self.currentType isEqualToString:@"public.url"]) {//分享网址
 //                return @"网址";
-            }else if ([self.currentType isEqualToString:@"public.jpeg"]) {//分享图片
+            }else if (([self.currentType isEqualToString:@"public.jpeg"] || [self.currentType isEqualToString:@"public.png"] || [self.currentType isEqualToString:@"com.compuserve.gif"])) {//分享图片
 //                return @"图片";
-                if (self.cycleScrollView == nil) {
-                    CycleScrollView *scrollView = [[CycleScrollView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.navView.frame) + 4, CGRectGetWidth(self.containerView.frame), CGRectGetWidth(self.containerView.frame) / 2) cycleDirection:CycleDirectionLandscape pictures:self.shareArray];
-                    [self.containerView addSubview:scrollView];
-                }else {
-                    [self.cycleScrollView resetScrollViewImages:self.shareArray];
+                @synchronized(self) {
+                    if (self.cycleScrollView == nil) {
+                        CycleScrollView *scrollView = [[CycleScrollView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.navView.frame) + 4, CGRectGetWidth(self.containerView.frame), CGRectGetWidth(self.containerView.frame) / 2) cycleDirection:CycleDirectionLandscape pictures:self.shareArray];
+                        [self.containerView addSubview:self.cycleScrollView = scrollView];
+                    }else {
+                        [self.cycleScrollView resetScrollViewImages:self.shareArray];
+                    }
                 }
                 
-            }else if ([self.currentType isEqualToString:@"public.video"]) {//分享视频
+                
+            }else if ([self.currentType isEqualToString:@"com.apple.quicktime-movie"]) {//分享视频
                 
 //                return @"视频";
             }else {
