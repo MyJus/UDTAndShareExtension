@@ -86,7 +86,7 @@
                     }else {//可以分享
                         
                     }
-                    [weakself.shareArray addObject:item];
+                    [weakself.shareArray addObject:[(NSURL *)item absoluteString]];
                     [weakself creatUIWithMessage:nil];
                 }];
             }else if ([itemProvider hasItemConformingToTypeIdentifier:@"public.jpeg"] || [itemProvider hasItemConformingToTypeIdentifier:@"public.png"] || [itemProvider hasItemConformingToTypeIdentifier:@"com.compuserve.gif"]) {//分享图片
@@ -200,9 +200,8 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         if (message == nil) {
             if ([self.currentType isEqualToString:@"public.url"]) {//分享网址
-//                return @"网址";
+                [self showMessage:[NSString stringWithFormat:@"分享的一个网址：%@",self.shareArray.lastObject]];
             }else if (([self.currentType isEqualToString:@"public.jpeg"] || [self.currentType isEqualToString:@"public.png"] || [self.currentType isEqualToString:@"com.compuserve.gif"])) {//分享图片
-//                return @"图片";
                 @synchronized(self) {
                     if (self.cycleScrollView == nil) {
                         CycleScrollView *scrollView = [[CycleScrollView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.navView.frame) + 4, CGRectGetWidth(self.containerView.frame), CGRectGetWidth(self.containerView.frame) / 2) cycleDirection:CycleDirectionLandscape pictures:self.shareArray delegate:nil];
@@ -214,23 +213,33 @@
                 
                 
             }else if ([self.currentType isEqualToString:@"com.apple.quicktime-movie"]) {//分享视频
-                
-//                return @"视频";
+                [self showMessage:[NSString stringWithFormat:@"分享的视频：%@",self.shareArray.lastObject]];
             }else {
-//                return nil;
+                [self showMessage:[NSString stringWithFormat:@"暂不支持分享的类型：%@",self.currentType]];
             }
         }else {
-            //定义一个分享链接标签
-            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(8,
-                                                                       self.navView.frame.origin.y + self.navView.frame.size.height + 8,
-                                                                       self.navView.frame.size.width - 16,
-                                                                       self.containerView.frame.size.height - 16 - self.navView.frame.origin.y - self.navView.frame.size.height)];
-            label.numberOfLines = 0;
-            label.textAlignment = NSTextAlignmentCenter;
-            label.text = message;
-            [self.containerView addSubview:label];
+            [self showMessage:message];
         }
     });
+    
+}
+- (void)showMessage:(NSString *)message {
+    
+    UILabel *label = [self.containerView viewWithTag:200];
+    
+    if (label == nil) {
+        label = [[UILabel alloc] initWithFrame:CGRectMake(8,
+                                                                   self.navView.frame.origin.y + self.navView.frame.size.height + 8,
+                                                                   self.navView.frame.size.width - 16,
+                                                                   self.containerView.frame.size.height - 16 - self.navView.frame.origin.y - self.navView.frame.size.height)];
+        label.tag = 200;
+        label.numberOfLines = 0;
+        label.textAlignment = NSTextAlignmentCenter;
+        label.text = message;
+        [self.containerView addSubview:label];
+    }else {
+        label.text = message;
+    }
     
 }
 
