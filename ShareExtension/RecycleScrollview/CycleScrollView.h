@@ -1,12 +1,14 @@
 //
 //  CycleScrollView.h
-//  CycleScrollDemo
+//  ShareExtension
 //
-//  Created by Weever Lu on 12-6-14.
-//  Copyright (c) 2012年 linkcity. All rights reserved.
+//  Created by peony on 2018/6/6.
+//  Copyright © 2018年 peony. All rights reserved.
 //
 
+
 #import <UIKit/UIKit.h>
+
 typedef enum {
     CycleDirectionPortait,          // 垂直滚动
     CycleDirectionLandscape         // 水平滚动
@@ -14,35 +16,46 @@ typedef enum {
 
 @protocol CycleScrollViewDelegate;
 
-@interface CycleScrollView : UIView <UIScrollViewDelegate> {
-    
-    UIScrollView *scrollView;
-    UIImageView *curImageView;
-    
-    int totalPage;  
-    int curPage;
-    CGRect scrollFrame;
-    
-    CycleDirection scrollDirection;     // scrollView滚动的方向
-    NSArray *imagesArray;               // 存放所有需要滚动的图片 UIImage
-    NSMutableArray *curImages;          // 存放当前滚动的三张图片
-    NSArray *beforeShowImages;          // 之前展示的三张图片
-    UIPageControl *pageControl;
-}
+@interface CycleScrollView : UIView
 
-@property (nonatomic, weak) id delegate;
 
-- (int)validPageValue:(NSInteger)value;
-- (id)initWithFrame:(CGRect)frame cycleDirection:(CycleDirection)direction pictures:(NSArray *)pictureArray;
-- (NSArray *)getDisplayImagesWithCurpage:(int)page;
-- (void)refreshScrollView;
+/**
+ 初始化方法
+
+ @param frame 展示的位置
+ @param direction 滑动方向
+ @param pictureArray 图片数据源，（支持URLString、NSURL、ImageData、Image，支持多样混合）
+ @param delegate 代理（用于手机循环滚动图片的点击之间）
+ @return 返回实例
+ */
+- (id)initWithFrame:(CGRect)frame cycleDirection:(CycleDirection)direction pictures:(NSArray *)pictureArray delegate:(id<CycleScrollViewDelegate>)delegate;
+
+
+/**
+ 重置循环滚动的数据源
+
+ @param pictureArray 图片数据源
+ */
 - (void)resetScrollViewImages:(NSArray *)pictureArray;
 
 @end
 
 @protocol CycleScrollViewDelegate <NSObject>
 @optional
+
+/**
+ 代理回调方法，点击选择
+
+ @param cycleScrollView 调用代理的类
+ @param index 选择的下标，从1开始。比如数据源数组有三张图片，返回的index数值可能是1、2、3
+ */
 - (void)cycleScrollViewDelegate:(CycleScrollView *)cycleScrollView didSelectImageView:(int)index;
+/**
+ 代理回调方法，scrollView滚动到第几张图片
+ 
+ @param cycleScrollView 调用代理的类
+ @param index 滚动到的下标，从1开始。比如数据源数组有三张图片，返回的index数值可能是1、2、3
+ */
 - (void)cycleScrollViewDelegate:(CycleScrollView *)cycleScrollView didScrollImageView:(int)index;
 
 @end

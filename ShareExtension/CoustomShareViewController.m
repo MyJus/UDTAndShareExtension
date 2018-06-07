@@ -205,7 +205,7 @@
 //                return @"图片";
                 @synchronized(self) {
                     if (self.cycleScrollView == nil) {
-                        CycleScrollView *scrollView = [[CycleScrollView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.navView.frame) + 4, CGRectGetWidth(self.containerView.frame), CGRectGetWidth(self.containerView.frame) / 2) cycleDirection:CycleDirectionLandscape pictures:self.shareArray];
+                        CycleScrollView *scrollView = [[CycleScrollView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.navView.frame) + 4, CGRectGetWidth(self.containerView.frame), CGRectGetWidth(self.containerView.frame) / 2) cycleDirection:CycleDirectionLandscape pictures:self.shareArray delegate:nil];
                         [self.containerView addSubview:self.cycleScrollView = scrollView];
                     }else {
                         [self.cycleScrollView resetScrollViewImages:self.shareArray];

@@ -1,17 +1,46 @@
 //
 //  CycleScrollView.m
-//  CycleScrollDemo
+//  ShareExtension
 //
-//  Created by Weever Lu on 12-6-14.
-//  Copyright (c) 2012年 linkcity. All rights reserved.
+//  Created by peony on 2018/6/6.
+//  Copyright © 2018年 peony. All rights reserved.
 //
 
 #import "CycleScrollView.h"
 
+@interface CycleScrollView ()<UIScrollViewDelegate> {
+    
+    UIScrollView *scrollView;
+    UIImageView *curImageView;
+    
+    int totalPage;
+    int curPage;
+    CGRect scrollFrame;
+    
+    CycleDirection scrollDirection;     // scrollView滚动的方向
+    NSArray *imagesArray;               // 存放所有需要滚动的图片 UIImage
+    NSMutableArray *curImages;          // 存放当前滚动的三张图片
+    NSArray *beforeShowImages;          // 之前展示的三张图片
+    UIPageControl *pageControl;
+}
+
+@property (nonatomic, weak) id<CycleScrollViewDelegate> delegate;
+
+
+//私有方法
+- (int)validPageValue:(NSInteger)value;
+- (NSArray *)getDisplayImagesWithCurpage:(int)page;
+- (void)refreshScrollView;
+- (UIImage *)scaleImage:(UIImage *)image;
+- (void)loadImage:(UIImageView *)imageView urlString:(NSString *)urlString;
+- (void)handleTap:(UITapGestureRecognizer *)tap;
+
+@end
+
 
 @implementation CycleScrollView
-
-- (id)initWithFrame:(CGRect)frame cycleDirection:(CycleDirection)direction pictures:(NSArray *)pictureArray
+//MARK: - 初始化
+- (id)initWithFrame:(CGRect)frame cycleDirection:(CycleDirection)direction pictures:(NSArray *)pictureArray delegate:(id<CycleScrollViewDelegate>)delegate
 {
     self = [super initWithFrame:frame];
     if(self)
@@ -19,6 +48,7 @@
         scrollFrame = frame;
         scrollDirection = direction;
         totalPage = pictureArray.count;
+        self.delegate = delegate;
         curPage = 1;                                    // 显示的是图片数组里的第一张图片
         curImages = [[NSMutableArray alloc] init];
         imagesArray = [[NSArray alloc] initWithArray:pictureArray];
@@ -54,6 +84,7 @@
     
     return self;
 }
+//MARK: - 修改数据源
 - (void)resetScrollViewImages:(NSArray *)pictureArray {
     totalPage = pictureArray.count;
     curPage = 1;                                    // 显示的是图片数组里的第一张图片
@@ -67,40 +98,26 @@
     
     [self getDisplayImagesWithCurpage:curPage];
     UIImageView *firstImageView = [scrollView viewWithTag:1000];
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        UIImage *showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[self->curImages objectAtIndex:0]]]];//[curImages objectAtIndex:i];
-        UIImage *image = [self scaleImage:showImage];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            firstImageView.image = image;
-        });
-    });
+    [self loadImage:firstImageView urlString:[curImages objectAtIndex:0]];
+    
     UIImageView *secondImageView = [scrollView viewWithTag:1001];
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        UIImage *showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[self->curImages objectAtIndex:1]]]];//[curImages objectAtIndex:i];
-        UIImage *image = [self scaleImage:showImage];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            secondImageView.image = image;
-        });
-    });
+    [self loadImage:secondImageView urlString:[curImages objectAtIndex:1]];
+    
     UIImageView *thirdImageView = [scrollView viewWithTag:1002];
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        UIImage *showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[self->curImages objectAtIndex:2]]]];//[curImages objectAtIndex:i];
-        UIImage *image = [self scaleImage:showImage];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            thirdImageView.image = image;
-        });
-    });
+    [self loadImage:thirdImageView urlString:[curImages objectAtIndex:2]];
     
     [self refreshScrollView];
 }
-
+//MARK: - 刷新pagecontrol
 - (void)refreshPageControl {
     pageControl.currentPage = curPage - 1;
 }
 
+//MARK: - 刷新展示（主要用于滑动后，位置调整及加载新图片）
 - (void)refreshScrollView {
     [self refreshPageControl];
     scrollView.scrollEnabled = imagesArray.count != 1;
+    pageControl.hidden = imagesArray.count == 1;
     
     [self getDisplayImagesWithCurpage:curPage];
     if (curImages.count == 0) {
@@ -119,30 +136,8 @@
                 //imageView.image = [][curImages objectAtIndex:i];
                 if (i == 1) {
                     NSString *urlString = [curImages objectAtIndex:i];
-                    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                        UIImage *showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]]];//[curImages objectAtIndex:i];
-                        UIImage *image = [self scaleImage:showImage];
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            imageView.image = image;
-                        });
-                    });
+                    [self loadImage:imageView urlString:[curImages objectAtIndex:i]];
                 }
-                
-                /*
-                 UIViewContentModeScaleToFill,
-                 UIViewContentModeScaleAspectFit,      // contents scaled to fit with fixed aspect. remainder is transparent
-                 UIViewContentModeScaleAspectFill,     // contents scaled to fill with fixed aspect. some portion of content may be clipped.
-                 UIViewContentModeRedraw,              // redraw on bounds change (calls -setNeedsDisplay)
-                 UIViewContentModeCenter,              // contents remain same size. positioned adjusted.
-                 UIViewContentModeTop,
-                 UIViewContentModeBottom,
-                 UIViewContentModeLeft,
-                 UIViewContentModeRight,
-                 UIViewContentModeTopLeft,
-                 UIViewContentModeTopRight,
-                 UIViewContentModeBottomLeft,
-                 UIViewContentModeBottomRight,
-                 */
                 imageView.contentMode = UIViewContentModeScaleAspectFit;
                 UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                                             action:@selector(handleTap:)];
@@ -170,28 +165,28 @@
                 UIImageView *thirdImageView = [scrollView viewWithTag:1002];
                 if(x >= (2*scrollFrame.size.width)) {
                     firstImageView.image = secondImageView.image;
+                    if (firstImageView.image == nil) {
+                        [self loadImage:firstImageView urlString:[curImages objectAtIndex:0]];
+                    }
                     secondImageView.image = thirdImageView.image;
+                    if (secondImageView.image == nil) {
+                        [self loadImage:secondImageView urlString:[curImages objectAtIndex:1]];
+                    }
                     [self resetScrollViewContentOffset];
-                    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                        UIImage *showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[self->curImages objectAtIndex:2]]]];//[curImages objectAtIndex:i];
-                        UIImage *image = [self scaleImage:showImage];
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            thirdImageView.image = image;
-                        });
-                    });
+                    [self loadImage:thirdImageView urlString:[curImages objectAtIndex:2]];
                 }
                 if(x <= 0) {
                     UIImage *secondImage = secondImageView.image;
                     secondImageView.image = firstImageView.image;
+                    if (secondImageView.image == nil) {
+                        [self loadImage:secondImageView urlString:[curImages objectAtIndex:1]];
+                    }
                     [self resetScrollViewContentOffset];
                     thirdImageView.image = secondImage;
-                    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                        UIImage *showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[self->curImages objectAtIndex:0]]]];//[curImages objectAtIndex:i];
-                        UIImage *image = [self scaleImage:showImage];
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            firstImageView.image = image;
-                        });
-                    });
+                    if (thirdImageView.image == nil) {
+                        [self loadImage:thirdImageView urlString:[curImages objectAtIndex:2]];
+                    }
+                    [self loadImage:firstImageView urlString:[curImages objectAtIndex:0]];
                 }
             }
             
@@ -204,28 +199,28 @@
                 UIImageView *thirdImageView = [scrollView viewWithTag:1002];
                 if(y >= 2 * (scrollFrame.size.height)) {
                     firstImageView.image = secondImageView.image;
+                    if (firstImageView.image == nil) {
+                        [self loadImage:firstImageView urlString:[curImages objectAtIndex:0]];
+                    }
                     secondImageView.image = thirdImageView.image;
+                    if (secondImageView.image == nil) {
+                        [self loadImage:secondImageView urlString:[curImages objectAtIndex:1]];
+                    }
                     [self resetScrollViewContentOffset];
-                    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                        UIImage *showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[self->curImages objectAtIndex:2]]]];//[curImages objectAtIndex:i];
-                        UIImage *image = [self scaleImage:showImage];
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            thirdImageView.image = image;
-                        });
-                    });
+                    [self loadImage:thirdImageView urlString:[curImages objectAtIndex:2]];
                 }
                 if(y <= 0) {
                     UIImage *secondImage = secondImageView.image;
                     secondImageView.image = firstImageView.image;
+                    if (secondImageView.image == nil) {
+                        [self loadImage:secondImageView urlString:[curImages objectAtIndex:1]];
+                    }
                     [self resetScrollViewContentOffset];
                     thirdImageView.image = secondImage;
-                    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                        UIImage *showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[self->curImages objectAtIndex:0]]]];//[curImages objectAtIndex:i];
-                        UIImage *image = [self scaleImage:showImage];
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            firstImageView.image = image;
-                        });
-                    });
+                    if (thirdImageView.image == nil) {
+                        [self loadImage:thirdImageView urlString:[curImages objectAtIndex:2]];
+                    }
+                    [self loadImage:firstImageView urlString:[curImages objectAtIndex:0]];
                 }
             }
         }
@@ -235,6 +230,7 @@
     
     
 }
+//MARK: - 重置scrollView便宜位置
 - (void)resetScrollViewContentOffset {
     if (scrollDirection == CycleDirectionLandscape) {
         [scrollView setContentOffset:CGPointMake(scrollFrame.size.width, 0)];
@@ -243,6 +239,7 @@
         [scrollView setContentOffset:CGPointMake(0, scrollFrame.size.height)];
     }
 }
+//MARK: - 展示的三张图片的数据源更换逻辑
 - (NSArray *)getDisplayImagesWithCurpage:(int)page {
     
     int pre = [self validPageValue:curPage-1];
@@ -267,6 +264,7 @@
     return value;
 }
 
+//MARK: - scrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)aScrollView {
     
     int x = aScrollView.contentOffset.x;
@@ -318,12 +316,39 @@
         [scrollView setContentOffset:CGPointMake(0, scrollFrame.size.height) animated:YES];
     }
 }
-
+//MARK: - showImageViewTap事件
 - (void)handleTap:(UITapGestureRecognizer *)tap {
     
     if ([self.delegate respondsToSelector:@selector(cycleScrollViewDelegate:didSelectImageView:)]) {
         [self.delegate cycleScrollViewDelegate:self didSelectImageView:curPage];
     }
+}
+//MARK: - 图片加载的工具方法
+- (void)loadImage:(UIImageView *)imageView urlString:(NSString *)urlString {
+    //还可以使用SD、AF或YYKit进行加载网络图片
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        UIImage *showImage = nil;
+        if ([urlString isKindOfClass:[NSString class]]) {
+            showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]]];
+        }else if ([urlString isKindOfClass:[NSURL class]]) {
+            showImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:(NSURL *)urlString]];//[curImages objectAtIndex:i];
+        }else if ([urlString isKindOfClass:[NSData class]]) {
+            showImage = [UIImage imageWithData:(NSData *)urlString];//[curImages objectAtIndex:i];
+        }else if ([urlString isKindOfClass:[UIImage class]]) {
+            showImage = (UIImage *)urlString;
+        }else {
+            //不支持的类型
+            showImage = nil;
+        }
+        
+        if (showImage != nil) {
+            UIImage *image = [self scaleImage:showImage];
+            //这里还可以增加图片的解压缩
+            dispatch_async(dispatch_get_main_queue(), ^{
+                imageView.image = image;
+            });
+        }
+    });
 }
 
 /*
