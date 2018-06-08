@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "RequestManager.h"
 
 
 
@@ -19,6 +20,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    
+    [[[RequestManager alloc] init] sendData:[@"/ecm/ecm.service.RsaKey.html?method=getRsaPub" dataUsingEncoding:NSUTF8StringEncoding] ServerIp:@"user.sdecpay.com" port:@"80"];
 }
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];

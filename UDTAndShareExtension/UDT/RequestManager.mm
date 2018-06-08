@@ -59,7 +59,7 @@ DWORD WINAPI monitor(LPVOID s)
 
 @implementation RequestManager
 
-- (void)connectServerIp:(NSString *)server_ip port:(NSString *)port data:(NSData *)sendData{
+- (void)sendData:(NSData *)sendData ServerIp:(NSString *)server_ip port:(NSString *)port {
     UDTUpDown _udt_;
     struct addrinfo hints, *local, *peer;
     memset(&hints, 0, sizeof(struct addrinfo));
@@ -77,11 +77,12 @@ DWORD WINAPI monitor(LPVOID s)
     
     UDTSOCKET client = UDT::socket(local->ai_family, local->ai_socktype, local->ai_protocol);
     
-#ifndef WIN32
-    UDT::setsockopt(client, 0, UDT_RENDEZVOUS, new bool(true), sizeof(bool));
-#else
+//#ifndef WIN32
+//    UDT::setsockopt(client, 0, UDT_RENDEZVOUS, new bool(true), sizeof(bool));
+//#else
     UDT::setsockopt(client, 0, UDT_MSS, new int(1052), sizeof(int));
-#endif
+    UDT::setsockopt(client, 0, UDP_RCVBUF, new int(5590000), sizeof(int));
+//#endif
     
     if (UDT::ERROR == UDT::bind(client, local->ai_addr, local->ai_addrlen))
     {

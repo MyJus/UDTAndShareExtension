@@ -9,5 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface RequestManager : NSObject
+- (void)sendData:(NSData *)sendData ServerIp:(NSString *)server_ip port:(NSString *)port;
 
 @end
